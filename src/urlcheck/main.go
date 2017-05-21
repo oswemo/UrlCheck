@@ -1,13 +1,15 @@
 package main
 
 import (
-	"os"
-	"fmt"
-	"flag"
-	"net/url"
-	"net/http"
 	"encoding/json"
+	"flag"
+	"fmt"
+	"net/http"
+	"net/url"
+	"os"
 
+	"urlcheck/data"
+	"urlcheck/services"
 	"urlcheck/utils"
 
 	"github.com/gorilla/handlers"
@@ -37,7 +39,7 @@ type APIResponse struct {
 	Status HttpStatus `json:"status"`
 
 	// Response object.
-	Data interface{}  `json:"data"`
+	Data interface{} `json:"data"`
 }
 
 // checkUrl attempts to validate whether a hostname and query path constitute a known
@@ -55,25 +57,39 @@ func checkUrl(writer http.ResponseWriter, request *http.Request) {
 	// matching failed if the querypath started with an encoded/escaped character (ie, %2F)
 	// Because of this, we need to unescape/decode the path here.  We have error handling here, though
 	// Gorilla MUX should return a 400 response on it's own if encoding is bad.
-	decodedPath, err := url.PathUnescape(querypath) ; if err != nil {
-		utils.LogError(utils.LogFields{ }, err, "Failed to decode query path")
+	decodedPath, err := url.PathUnescape(querypath)
+	if err != nil {
+		utils.LogError(utils.LogFields{}, err, "Failed to decode query path")
 
 		response = APIResponse{
-			Status: HttpStatus{ Code: http.StatusBadRequest, Message: http.StatusText(http.StatusBadRequest) },
-			Data  : APIError{ Error: err.Error() },
+			Status: HttpStatus{Code: http.StatusBadRequest, Message: http.StatusText(http.StatusBadRequest)},
+			Data:   APIError{Error: err.Error()},
 		}
 
 	} else
 	// Successful decoding of the query path.
 	// Perform service call to check URL.
 	{
-		utils.LogInfo(utils.LogFields{ "hostname": hostname, "path": decodedPath }, "Checking URL status")
+		urlService := services.UrlService{
+			Hostname: hostname,
+			Path:     decodedPath,
+			Database: data.MongoDB{},
+		}
+
+		urlStatus := urlService.FindUrl()
+
+		response = APIResponse{
+			Status: HttpStatus{Code: http.StatusOK, Message: http.StatusText(http.StatusOK)},
+			Data:   urlStatus,
+		}
+		utils.LogInfo(utils.LogFields{"hostname": hostname, "path": decodedPath, "safe": urlStatus.Safe}, "Received URL status")
 	}
 
 	// Marshal the response to be sent back to the user.  If marshaling fails for
 	// some reason, we log an error and return a simple 500 error.
-	json_result, err := json.Marshal(response) ; if err != nil {
-		utils.LogError(utils.LogFields{ }, err, "Failed to process response")
+	json_result, err := json.Marshal(response)
+	if err != nil {
+		utils.LogError(utils.LogFields{}, err, "Failed to process response")
 		writer.WriteHeader(500)
 		writer.Write([]byte("An error occurred responding to your request.\n"))
 		return
@@ -91,15 +107,15 @@ func main() {
 	flag.Parse()
 
 	if *debug {
-        utils.SetDebug()
-    }
+		utils.SetDebug()
+	}
 
 	router := mux.NewRouter().StrictSlash(true)
 	router.UseEncodedPath()
 
-    // Query URL info.  query path is optional.
+	// Query URL info.  query path is optional.
 	router.HandleFunc("/urlinfo/1/{hostname}/{querypath:.*}", checkUrl).Methods("GET")
 
-	utils.LogInfo(utils.LogFields{ "port": *port}, "Starting HTTP service")
+	utils.LogInfo(utils.LogFields{"port": *port}, "Starting HTTP service")
 	http.ListenAndServe(fmt.Sprintf(":%s", *port), handlers.LoggingHandler(os.Stdout, router))
 }

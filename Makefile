@@ -7,6 +7,18 @@ SRC_FOLDERS=""
 
 default: deps build
 
+fmt:
+	for FOLDER in ${SRC_FOLDERS} ; do \
+	    cd ${BASE}/${FOLDER} ; \
+	    go fmt ;\
+	done
+
+vet:
+	for FOLDER in ${SRC_FOLDERS} ; do \
+	    cd ${BASE}/${FOLDER} ; \
+	    go vet ;\
+	done
+
 deps:
 	for FOLDER in ${SRC_FOLDERS} ; do \
 	    cd ${BASE}/${FOLDER} ; \
