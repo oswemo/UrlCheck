@@ -1,0 +1,35 @@
+version: '3.0'
+services:
+    # MongoDB service holding the URL data.
+    mongo:
+        image: mongo:3.4
+        ports:
+            - 27017:27017
+        volumes:
+            - ./mongo-data:/data/db
+
+    # Memcached.
+    memcache:
+        image: memcached:1.4.36
+        ports:
+            - 11211:11211
+
+    # urlinfo API service.
+    apiservice:
+        build: .
+        ports:
+            - 8001:8001
+        links:
+            - mongo
+            - memcache
+
+    # Seed MongoDB with initial data set downloaded from http://www.phishtank.com/
+    # Seeding additionally takes the URL from the phishtank data and breaks it out into
+    # multiple attributes while removing additional info that isn't needed for this example.
+    mongo-seed:
+        build: seed
+        links:
+            - mongo
+
+volumes:
+    mongo-data: {}
