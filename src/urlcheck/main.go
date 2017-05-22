@@ -73,7 +73,11 @@ func checkUrl(writer http.ResponseWriter, request *http.Request) {
 		urlService := services.UrlService{
 			Hostname: hostname,
 			Path:     decodedPath,
-			Database: data.MongoDB{},
+			Database: data.MongoDB{
+				URL       : "mongo",
+				DBName    : "urlinfo",
+				Collection: "urls",
+			},
 		}
 
 		urlStatus := urlService.FindUrl()

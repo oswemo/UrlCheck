@@ -17,15 +17,19 @@ def processEntry(entry):
 
     port = parsedUrl.port
 
-    if port == None:
-        if parsedUrl.scheme == "http":
-            port = 80
+    if port is None:
         if parsedUrl.scheme == "https":
             port = 443
+        else:
+            port = 80
+
+    pathquery = parsedUrl.path
+    if parsedUrl.query is not None and parsedUrl.query != "":
+        pathquery += "?%s" % parsedUrl.query
 
     return {
         'hostport' : "%s:%d" % (parsedUrl.netloc, port),
-        'pathquery': "%s?%s" % (parsedUrl.path, parsedUrl.query)
+        'pathquery': pathquery
     }
 
 #############################################
