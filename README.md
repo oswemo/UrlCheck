@@ -9,7 +9,7 @@ Initially, storage will be handed with a MongoDB backend, fronted by Memcached w
 Storage is seeded initially through data downloaded from http://www.phishtank.com/, and processed via a quick python script that uses `urlparse` to break the url into it's various pieces.
 
 ### Deployment:
-Service will be deployed within a docker container with configuration for mesos deployment.  Scaling of resources will be dependant on further configuration, taking into account CPU and memory reservations with an auto-scaling group.   
+Service will be deployed within a docker container with configuration for deploying dependant services as well.  Scaling of resources will be dependant on further configuration, taking into account CPU and memory reservations with an auto-scaling group.   
 
 ### Design Decisions:
 
