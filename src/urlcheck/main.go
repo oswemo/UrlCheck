@@ -73,19 +73,24 @@ func checkUrl(writer http.ResponseWriter, request *http.Request) {
 		urlService := services.UrlService{
 			Hostname: hostname,
 			Path:     decodedPath,
-			Database: data.MongoDB{
-				URL       : "mongo",
-				DBName    : "urlinfo",
-				Collection: "urls",
-			},
+			Database: data.NewMongoDB("mongo", "urlinfo", "urls"),
+			Cache:    data.NewMemcache("memcache:11211", 30),
 		}
 
-		urlStatus := urlService.FindUrl()
+		urlStatus, err := urlService.FindUrl()
 
-		response = APIResponse{
-			Status: HttpStatus{Code: http.StatusOK, Message: http.StatusText(http.StatusOK)},
-			Data:   urlStatus,
+		if err != nil {
+			response = APIResponse{
+				Status: HttpStatus{Code: http.StatusInternalServerError, Message: http.StatusText(http.StatusInternalServerError)},
+				Data:   nil,
+			}
+		} else {
+			response = APIResponse{
+				Status: HttpStatus{Code: http.StatusOK, Message: http.StatusText(http.StatusOK)},
+				Data:   urlStatus,
+			}
 		}
+
 		utils.LogInfo(utils.LogFields{"hostname": hostname, "path": decodedPath, "safe": urlStatus.Safe}, "Received URL status")
 	}
 

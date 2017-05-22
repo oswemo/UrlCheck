@@ -29,3 +29,4 @@ Execute `make run` to run the project.
 
 1.  Encoding errors in the request cause Gorilla MUX errors that do not conform to the standard responses from other parts of the API.
 2.  For consistency, each start of the service (`make run`) will wipe data and start fresh.
+3.  Database connection and error handling code is rudimentary.  Not production ready.

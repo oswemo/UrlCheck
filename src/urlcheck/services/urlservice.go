@@ -1,7 +1,10 @@
 package services
 
 import (
+    "errors"
+
     "urlcheck/data"
+    "urlcheck/utils"
 )
 
 // UrlService definition
@@ -23,12 +26,42 @@ type UrlInfoStatus struct {
 // If found, a UrlInfoStatus object is returned with a "true" value.
 // If not found, a UrlInfoStatus object is returned with a "false" value.
 //
-func (u *UrlService) FindUrl() (UrlInfoStatus) {
-    status := UrlInfoStatus{ Safe: true }
+func (u *UrlService) FindUrl() (*UrlInfoStatus, error) {
+    status := &UrlInfoStatus{ Safe: true }
 
-    _, err := u.Database.FindUrl(u.Hostname, u.Path); if err == nil {
-        // No error, so the URL was found in the database.
-        status.Safe = false
+    var err error
+
+    // Assuming cache endpoint is defined.
+    if u.Cache != nil {
+        _, err = u.Cache.Get(u.Hostname, u.Path)
     }
-    return status
+
+    // if the key is in the cache, then further work is not needed.
+    if u.Cache != nil && err == nil {
+        utils.LogDebug(utils.LogFields{"hostname": u.Hostname, "path": u.Path, "safe": status.Safe}, "A match was found in the cache")
+        status.Safe = false
+    } else {
+
+        // The key was not found in the cache, cache is not being used, or cache lookup failed with an error.
+        _, err := u.Database.FindUrl(u.Hostname, u.Path)
+
+        // Database returned a NotFoundError
+        if err != nil && err == data.NotFoundError {
+            utils.LogDebug(utils.LogFields{"hostname": u.Hostname, "path": u.Path, "safe": status.Safe}, "No matching URL found")
+        }
+
+        // Database returned some other (connection failure, etc)
+        if err != nil && err != data.NotFoundError {
+            utils.LogError(utils.LogFields{"hostname": u.Hostname, "path": u.Path}, err, "Database error looking up URL")
+            return nil, errors.New("Error looking up URL")
+        }
+
+        // A matching URL was found in the database.
+        if err == nil {
+            utils.LogDebug(utils.LogFields{"hostname": u.Hostname, "path": u.Path, "safe": status.Safe}, "A match was found in the database")
+            status.Safe = false
+        }
+    }
+
+    return status, nil
 }

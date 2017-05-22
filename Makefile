@@ -34,5 +34,5 @@ build:
 
 	mv ${BASE}/urlcheck bin/
 
-run:
+run: deps build
 	docker-compose up --build
