@@ -74,7 +74,7 @@ func (u *UrlService) FindUrl() (*UrlInfoStatus, error) {
 func (u *UrlService) AddUrl() (error) {
     _, err := u.Database.FindUrl(u.Hostname, u.Path)
     if err == nil {
-        return errors.New("URL already exists")
+        return data.AlreadyExistsError
     }
 
     err = u.Database.AddUrl(u.Hostname, u.Path)

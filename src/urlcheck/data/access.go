@@ -7,6 +7,7 @@ import (
 
 var NotFoundError = errors.New("URL not found")
 var AddFailureError = errors.New("Error adding new URL")
+var AlreadyExistsError = errors.New("URL already exists")
 
 type DBInterface interface {
     // Find a URL by hostname/port and path/query
