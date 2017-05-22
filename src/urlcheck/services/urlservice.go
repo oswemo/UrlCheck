@@ -60,8 +60,31 @@ func (u *UrlService) FindUrl() (*UrlInfoStatus, error) {
         if err == nil {
             utils.LogDebug(utils.LogFields{"hostname": u.Hostname, "path": u.Path, "safe": status.Safe}, "A match was found in the database")
             status.Safe = false
+
+            //Update cache.
+            u.Cache.Set(u.Hostname, u.Path)
         }
     }
 
     return status, nil
+}
+
+// AddUrl adds a new hostname/port and path/query combination to the database and cache.
+// Returns an error if something goes wrong.
+func (u *UrlService) AddUrl() (error) {
+    _, err := u.Database.FindUrl(u.Hostname, u.Path)
+    if err == nil {
+        return errors.New("URL already exists")
+    }
+
+    err = u.Database.AddUrl(u.Hostname, u.Path)
+    if err != nil {
+        utils.LogError(utils.LogFields{"hostname": u.Hostname, "path": u.Path}, err, "Error adding new URL")
+        return data.AddFailureError
+    }
+
+    //Update cache.
+    u.Cache.Set(u.Hostname, u.Path)
+
+    return nil
 }

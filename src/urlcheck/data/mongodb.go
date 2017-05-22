@@ -13,7 +13,7 @@ import (
 )
 
 const (
-    DB_TIMEOUT = 5
+    DB_TIMEOUT = 2
 )
 
 // MongoDB Struct, defines options for MongoDB database connections.
@@ -23,6 +23,13 @@ type MongoDB struct {
     Collection string  // Collection name
 
     Session    *mgo.Session
+}
+
+// UrlSchema struct defines the layout of the MongoDB collection data.
+type UrlSchema struct {
+    ID        bson.ObjectId `bson:"_id,omitempty"`
+    HostPort  string        `json:"hostport"`
+    PathQuery string        `json:"pathquery"`
 }
 
 // NewMongoDB returns a new instance of the MongoDB struct.
@@ -65,8 +72,6 @@ func (m MongoDB) FindUrl(hostname string, path string) (*models.Urls, error) {
         "pathquery": path,
     }
 
-    logFields := utils.LogFields{"hostname": hostname, "path": path, "database": m.DBName, "collection": m.Collection}
-    utils.LogDebug(logFields, "attaching to collection")
     c := m.Session.DB(m.DBName).C(m.Collection)
 
     result := models.Urls{}
@@ -82,4 +87,13 @@ func (m MongoDB) FindUrl(hostname string, path string) (*models.Urls, error) {
     }
 
     return &result, nil
+}
+
+// AddUrl adds a hostname/port and path/query combination to the database.
+// An error is returned if anything goes wrong.
+func (m MongoDB) AddUrl(hostname string, path string) (error) {
+    doc := UrlSchema{ HostPort: hostname, PathQuery: path }
+    c := m.Session.DB(m.DBName).C(m.Collection)
+    err := c.Insert(&doc)
+    return err
 }

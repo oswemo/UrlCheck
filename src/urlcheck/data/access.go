@@ -6,10 +6,14 @@ import (
 )
 
 var NotFoundError = errors.New("URL not found")
+var AddFailureError = errors.New("Error adding new URL")
 
 type DBInterface interface {
     // Find a URL by hostname/port and path/query
     FindUrl(string, string) (*models.Urls, error)
+
+    // Add a new URL to the system.
+    AddUrl(string, string) (error)
 }
 
 type CacheInterface interface {
@@ -19,7 +23,4 @@ type CacheInterface interface {
 
     // Set a cache key value pair.
     Set(string, string) (error)
-
-    // Delete a cache key
-    Delete(string, string)
 }

@@ -48,13 +48,9 @@ func (m Memcached) Get(hostname string, path string) (string, error) {
 
 // Set a cache key value pair.
 func (m Memcached) Set(hostname string, path string) (error) {
-    // key := m.cacheKey(hostname, path)
-    return nil
-}
+    key := m.cacheKey(hostname, path)
+    return m.Client.Set(&memcache.Item{Key: key, Value: []byte("exists"), Expiration: m.Expiration})
 
-// Delete a cache key
-func (m Memcached) Delete(hostname string, path string) {
-    // key := m.cacheKey(hostname, path)
 }
 
 // cacheKey returns a formatted key for storing cache items.

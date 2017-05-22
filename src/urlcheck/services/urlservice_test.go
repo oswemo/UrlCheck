@@ -106,3 +106,7 @@ func TestFindUrl(t *testing.T) {
         }
     }
 }
+
+// TestAddUrl tests the AddUrl() method
+func TestAddUrl(t *testing.T) {
+}
