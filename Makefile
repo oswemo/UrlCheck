@@ -1,38 +1,32 @@
 GOPATH := ${PWD}
 export GOPATH
 
-# Opted to set up a bit differently and not use glide this time.
-BASE="src/urlcheck"
-SRC_FOLDERS=""
+BASE=urlcheck
+
+PACKAGES=${BASE}          \
+         ${BASE}/data     \
+         ${BASE}/models   \
+		 ${BASE}/services \
+		 ${BASE}/utils
 
 default: deps build
 
+test:
+	@go test -v ${PACKAGES}
+
 fmt:
-	for FOLDER in ${SRC_FOLDERS} ; do \
-	    cd ${BASE}/${FOLDER} ; \
-	    go fmt ;\
-	done
+	@go fmt ${PACKAGES}
 
 vet:
-	for FOLDER in ${SRC_FOLDERS} ; do \
-	    cd ${BASE}/${FOLDER} ; \
-	    go vet ;\
-	done
+	@go vet ${PACKAGES}
 
 deps:
-	for FOLDER in ${SRC_FOLDERS} ; do \
-	    cd ${BASE}/${FOLDER} ; \
-	    go get ;\
-	done
+	@go get ${PACKAGES}
 
 build:
 	mkdir -p bin/
-	for FOLDER in ${SRC_FOLDERS} ; do \
-		cd ${BASE}/${FOLDER} ; \
-		go build ;\
-	done
-
-	mv ${BASE}/urlcheck bin/
+	cd src/${BASE} && go build
+	mv src/${BASE}/${BASE} bin/
 
 run: deps build
 	docker-compose up --build

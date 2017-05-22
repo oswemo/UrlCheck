@@ -1,16 +1,14 @@
 package main
 
 import (
-	"os"
-	"flag"
-	"fmt"
-	"net/url"
-	"net/http"
-	"strconv"
-	"regexp"
-	"strings"
 	"errors"
-	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"os"
+	"regexp"
+	"strconv"
+	"strings"
 
 	"urlcheck/data"
 	"urlcheck/services"
@@ -20,34 +18,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const (
-	// Default port to attach HTTP service to.
-	DEFAULT_PORT = "8001"
-)
-
-// HttpStatus is a simple wrapper containing the HTTP status code and an optional
-// message.
-type HttpStatus struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
-// APIError is used to wrap any errors in the Data section of the APIResponse
-type APIError struct {
-	Error string `json:"error"`
-}
-
-// APIResponse is used to wrap all API responses in a standard layout.
-type APIResponse struct {
-	// HTTP status, notes HTTP status code and optional message.
-	Status HttpStatus `json:"status"`
-
-	// Response object.
-	Data interface{} `json:"data"`
-}
-
 // validateUrl attempts to validate that the inputs are correct.
-func validateUrl(hostname string, path string) (error) {
+func validateUrl(hostname string, path string) error {
 	// A hostname should contain the host and port.
 	parts := strings.Split(hostname, ":")
 	if len(parts) != 2 {
@@ -90,7 +62,7 @@ func checkUrl(writer http.ResponseWriter, request *http.Request) {
 			Status: HttpStatus{Code: http.StatusBadRequest, Message: http.StatusText(http.StatusBadRequest)},
 			Data:   APIError{Error: err.Error()},
 		}
-	}else {
+	} else {
 		// We had to enable "UseEncodedPath" on Gorilla MUX to fix an issue where path
 		// matching failed if the querypath started with an encoded/escaped character (ie, %2F)
 		// Because of this, we need to unescape/decode the path here.  We have error handling here, though
@@ -118,6 +90,7 @@ func checkUrl(writer http.ResponseWriter, request *http.Request) {
 			urlStatus, err := urlService.FindUrl()
 
 			if err != nil {
+				utils.LogError(utils.LogFields{"hostname": hostname, "path": decodedPath}, err, "Error getting URL")
 				response = APIResponse{
 					Status: HttpStatus{Code: http.StatusInternalServerError, Message: http.StatusText(http.StatusInternalServerError)},
 					Data:   nil,
@@ -128,25 +101,10 @@ func checkUrl(writer http.ResponseWriter, request *http.Request) {
 					Data:   urlStatus,
 				}
 			}
-
-			utils.LogInfo(utils.LogFields{"hostname": hostname, "path": decodedPath, "safe": urlStatus.Safe}, "Received URL status")
 		}
-
 	}
 
-	// Marshal the response to be sent back to the user.  If marshaling fails for
-	// some reason, we log an error and return a simple 500 error.
-	json_result, err := json.Marshal(response)
-	if err != nil {
-		utils.LogError(utils.LogFields{}, err, "Failed to process response")
-		writer.WriteHeader(500)
-		writer.Write([]byte("An error occurred responding to your request.\n"))
-		return
-	}
-
-	// Return the marshaled response.
-	writer.WriteHeader(response.Status.Code)
-	writer.Write(json_result)
+	http_respond(response, writer)
 }
 
 // addUrl adds a new host / path combination to the system.  The new entry will be
@@ -164,7 +122,7 @@ func addUrl(writer http.ResponseWriter, request *http.Request) {
 			Status: HttpStatus{Code: http.StatusBadRequest, Message: http.StatusText(http.StatusBadRequest)},
 			Data:   APIError{Error: err.Error()},
 		}
-	}else {
+	} else {
 		// We had to enable "UseEncodedPath" on Gorilla MUX to fix an issue where path
 		// matching failed if the querypath started with an encoded/escaped character (ie, %2F)
 		// Because of this, we need to unescape/decode the path here.  We have error handling here, though
@@ -204,30 +162,17 @@ func addUrl(writer http.ResponseWriter, request *http.Request) {
 		}
 	}
 
-	// Marshal the response to be sent back to the user.  If marshaling fails for
-	// some reason, we log an error and return a simple 500 error.
-	json_result, err := json.Marshal(response)
-	if err != nil {
-		utils.LogError(utils.LogFields{}, err, "Failed to process response")
-		writer.WriteHeader(500)
-		writer.Write([]byte("An error occurred responding to your request.\n"))
-		return
-	}
-
-	// Return the marshaled response.
-	writer.WriteHeader(response.Status.Code)
-	writer.Write(json_result)
-
-
+	http_respond(response, writer)
 }
 
 // Main function
 func main() {
-	port := flag.String("port", DEFAULT_PORT, "Listening port")
-	debug := flag.Bool("debug", false, "Debug output")
-	flag.Parse()
+	config, err := LoadConfig()
+	if err != nil {
+		os.Exit(1)
+	}
 
-	if *debug {
+	if config.Debug {
 		utils.SetDebug()
 	}
 
@@ -240,6 +185,6 @@ func main() {
 	// Add a new URL. query path is optional.
 	router.HandleFunc("/urlinfo/1/{hostname}/{querypath:.*}", addUrl).Methods("PUT")
 
-	utils.LogInfo(utils.LogFields{"port": *port}, "Starting HTTP service")
-	http.ListenAndServe(fmt.Sprintf(":%s", *port), handlers.LoggingHandler(os.Stdout, router))
+	utils.LogInfo(utils.LogFields{"port": config.Port}, "Starting HTTP service")
+	http.ListenAndServe(fmt.Sprintf(":%d", config.Port), handlers.LoggingHandler(os.Stdout, router))
 }
