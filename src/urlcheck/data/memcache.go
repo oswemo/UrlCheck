@@ -11,20 +11,21 @@ import (
 
 // Memcached structure
 type Memcached struct {
-	Client     *memcache.Client
-	Servers    string
-	Expiration int32
+	Config *MemcachedConfig
+	Client *memcache.Client
+}
+
+type MemcachedConfig struct {
+	Servers    string `json:"servers"    default:"memcache:11211"`
+	Expiration int    `json:"expiration" default:"300"`
 }
 
 // New returns a new memcached object
-func NewMemcache(servers string, expiration int32) Memcached {
-	memcached := Memcached{
-		Servers:    servers,
-		Expiration: expiration,
-	}
+func NewMemcache(config *MemcachedConfig) Memcached {
+	memcached := Memcached{ Config: config }
 
-	utils.LogInfo(utils.LogFields{"servers": servers, "expiration": expiration}, "Creating connection to memcached")
-	memcached.Client = memcache.New(servers)
+	utils.LogInfo(utils.LogFields{"servers": config.Servers, "expiration": config.Expiration}, "Creating connection to memcached")
+	memcached.Client = memcache.New(config.Servers)
 	return memcached
 }
 
@@ -49,7 +50,7 @@ func (m Memcached) Get(hostname string, path string) (string, error) {
 // Set a cache key value pair.
 func (m Memcached) Set(hostname string, path string) error {
 	key := m.cacheKey(hostname, path)
-	return m.Client.Set(&memcache.Item{Key: key, Value: []byte("exists"), Expiration: m.Expiration})
+	return m.Client.Set(&memcache.Item{Key: key, Value: []byte("exists"), Expiration: int32(m.Config.Expiration) })
 
 }
 

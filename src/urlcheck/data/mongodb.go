@@ -14,17 +14,18 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-const (
-	DB_TIMEOUT = 2
-)
-
 // MongoDB Struct, defines options for MongoDB database connections.
 type MongoDB struct {
-	URL        string // MongoDB URL
-	DBName     string // MongoDB DB name
-	Collection string // Collection name
-
+	Config  *MongoDBConfig
 	Session *mgo.Session
+}
+
+// MongoDBConfig defines configuration options for multiconfig
+type MongoDBConfig struct {
+	URL        string `json:"url"        default:"mongo"`
+	Database   string `json:"database"   default:"urlinfo"`
+	Collection string `json:"collection" default:"urls"`
+	Timeout    int    `json:"timeout"    default:"2"`
 }
 
 // UrlSchemaMongo struct defines the layout of the MongoDB collection data.
@@ -35,13 +36,8 @@ type UrlSchemaMongo struct {
 }
 
 // NewMongoDB returns a new instance of the MongoDB struct.
-func NewMongoDB(url string, dbname string, collection string) MongoDB {
-	mongo := MongoDB{
-		URL:        url,
-		DBName:     dbname,
-		Collection: collection,
-	}
-
+func NewMongoDB(config *MongoDBConfig) MongoDB {
+	mongo := MongoDB{ Config: config }
 	(&mongo).Connect()
 	return mongo
 }
@@ -52,12 +48,12 @@ func (m *MongoDB) Connect() error {
 
 	// Set up the MongoDB session.  Timeout set for connection and subsequent queries
 	// to limit requests having to wait for a response.
-	utils.LogInfo(utils.LogFields{"url": m.URL, "timeout": DB_TIMEOUT}, "Creating connection to mongodb")
-	timeout := time.Duration(DB_TIMEOUT) * time.Second
-	m.Session, err = mgo.DialWithTimeout(m.URL, timeout)
+	utils.LogInfo(utils.LogFields{"url": m.Config.URL, "timeout": m.Config.Timeout}, "Creating connection to mongodb")
+	timeout := time.Duration(m.Config.Timeout) * time.Second
+	m.Session, err = mgo.DialWithTimeout(m.Config.URL, timeout)
 
 	if err != nil {
-		utils.LogError(utils.LogFields{"url": m.URL}, err, "Error connecting to Mongo")
+		utils.LogError(utils.LogFields{"url": m.Config.URL}, err, "Error connecting to Mongo")
 	}
 
 	return err
@@ -78,7 +74,7 @@ func (m MongoDB) FindUrl(hostname string, path string) (*models.Urls, error) {
 		"pathquery": path,
 	}
 
-	c := m.Session.DB(m.DBName).C(m.Collection)
+	c := m.Session.DB(m.Config.Database).C(m.Config.Collection)
 
 	result := models.Urls{}
 	err := c.Find(query).One(&result)
@@ -104,7 +100,7 @@ func (m MongoDB) AddUrl(hostname string, path string) error {
 	}
 
 	doc := UrlSchemaMongo{HostPort: hostname, PathQuery: path}
-	c := m.Session.DB(m.DBName).C(m.Collection)
+	c := m.Session.DB(m.Config.Database).C(m.Config.Collection)
 	err := c.Insert(&doc)
 	return err
 }

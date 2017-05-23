@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/koding/multiconfig"
 
+	"urlcheck/data"
 	"urlcheck/utils"
 )
 
@@ -11,11 +12,11 @@ var config *Config
 
 // Configuration options
 type Config struct {
-	Port  int  `json:"port"  default:"8010"`
-	Debug bool `json:"debug" default:"false"`
+	Port     int                  `json:"port"  default:"8010"`
+	Debug    bool                 `json:"debug" default:"false"`
 
-	// String name of the database type.  Currently MongoDB or SQL
-	Database string `json:"database" default:"SQL"`
+	Mongo    data.MongoDBConfig   `json:"mongo"`
+	Memcache data.MemcachedConfig `json:"memcache"`
 }
 
 // Load the configuration from tag defaults and environment variables.
