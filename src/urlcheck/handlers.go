@@ -38,8 +38,8 @@ func checkUrl(writer http.ResponseWriter, request *http.Request) {
 	urlService := services.UrlService{
 		Hostname: hostname,
 		Path:     decodedPath,
-		Database: data.NewMongoDB(),
-		Cache:    data.NewMemcache(),
+		Database: data.SelectDB(config.DBType),
+		Cache:    data.SelectCache(config.CacheType),
 	}
 
 	urlStatus, err := urlService.FindUrl()
@@ -78,8 +78,8 @@ func addUrl(writer http.ResponseWriter, request *http.Request) {
 	urlService := services.UrlService{
 		Hostname: hostname,
 		Path:     decodedPath,
-		Database: data.NewMongoDB(),
-		Cache:    data.NewMemcache(),
+		Database: data.SelectDB(config.DBType),
+		Cache:    data.SelectCache(config.CacheType),
 	}
 
 	err = urlService.AddUrl()

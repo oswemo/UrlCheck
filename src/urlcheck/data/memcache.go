@@ -7,8 +7,8 @@ import (
 
 	"fmt"
 
-	"github.com/koding/multiconfig"
 	"github.com/bradfitz/gomemcache/memcache"
+	"github.com/koding/multiconfig"
 )
 
 // Memcached structure
@@ -18,22 +18,22 @@ type Memcached struct {
 }
 
 type MemcachedConfig struct {
-	Servers    string `json:"servers"    default:"memcache:11211"`    // MEMCACHEDCONFIG_SERVERS
-	Expiration int    `json:"expiration" default:"300"`               // MEMCACHEDCONFIG_EXPIRATION
+	Servers    string `json:"servers"    default:"memcache:11211"` // MEMCACHEDCONFIG_SERVERS
+	Expiration int    `json:"expiration" default:"300"`            // MEMCACHEDCONFIG_EXPIRATION
 }
 
 // New returns a new memcached object
-func NewMemcache() (*Memcached) {
+func NewMemcache() *Memcached {
 	config := &MemcachedConfig{}
 
-	loader := multiconfig.New()
+	loader := multiconfig.EnvironmentLoader{Prefix: "MEMCACHED"}
 	err := loader.Load(config)
 	if err != nil {
 		utils.LogError(utils.LogFields{}, err, "Failed to load configuration")
 		return nil
 	}
 
-	memcached := &Memcached{ Config: config }
+	memcached := &Memcached{Config: config}
 
 	utils.LogInfo(utils.LogFields{"servers": config.Servers, "expiration": config.Expiration}, "Creating connection to memcached")
 	memcached.Client = memcache.New(config.Servers)
@@ -61,7 +61,7 @@ func (m Memcached) Get(hostname string, path string) (string, error) {
 // Set a cache key value pair.
 func (m Memcached) Set(hostname string, path string) error {
 	key := m.cacheKey(hostname, path)
-	return m.Client.Set(&memcache.Item{Key: key, Value: []byte("exists"), Expiration: int32(m.Config.Expiration) })
+	return m.Client.Set(&memcache.Item{Key: key, Value: []byte("exists"), Expiration: int32(m.Config.Expiration)})
 
 }
 

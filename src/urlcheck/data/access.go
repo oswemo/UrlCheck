@@ -2,7 +2,9 @@ package data
 
 import (
 	"errors"
+
 	"urlcheck/models"
+	"urlcheck/utils"
 )
 
 var NotFoundError = errors.New("URL not found")
@@ -24,4 +26,28 @@ type CacheInterface interface {
 
 	// Set a cache key value pair.
 	Set(string, string) error
+}
+
+// Return the selected database backend
+func SelectDB(dbType string) DBInterface {
+	switch dbType {
+	default:
+		utils.LogError(utils.LogFields{"dbtype": dbType}, errors.New("Invalid DB type"), "")
+	case "mongodb":
+		return NewMongoDB()
+	}
+
+	return nil
+}
+
+// Return the selected cache backend
+func SelectCache(cacheType string) CacheInterface {
+	switch cacheType {
+	default:
+		utils.LogError(utils.LogFields{"cachetype": cacheType}, errors.New("Invalid cache type"), "")
+	case "memcached":
+		return NewMemcache()
+	}
+
+	return nil
 }
