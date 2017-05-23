@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/koding/multiconfig"
 
-	"urlcheck/data"
 	"urlcheck/utils"
 )
 
@@ -15,7 +14,6 @@ type Config struct {
 	Port     int                  `json:"port"  default:"8010"`
 	Debug    bool                 `json:"debug" default:"false"`
 
-	Memcache data.MemcachedConfig `json:"memcache"`
 }
 
 // Load the configuration from tag defaults and environment variables.
