@@ -10,7 +10,7 @@ RETCODE=1
 ATTEMPTS=0
 while [ $RETCODE -ne 0 -a $ATTEMPTS -lt 20 ] ; do
     sleep 5
-    nc -z -v -w5 mongo 27017
+    nc -z -v -w5 mongodb 27017
     RETCODE=$?
     ATTEMPTS=$(($ATTEMPTS+1))
 done
@@ -21,7 +21,7 @@ if [ $RETCODE -ne 0 ] ; then
 fi
 
 # Drop existing data
-mongo mongo/urlinfo --eval 'db.urls.drop()'
+mongo mongodb/urlinfo --eval 'db.urls.drop()'
 
 # Import new data
-mongoimport --host mongo --db urlinfo --collection urls --type json --file /seed_output.json
+mongoimport --host mongodb --db urlinfo --collection urls --type json --file /seed_output.json

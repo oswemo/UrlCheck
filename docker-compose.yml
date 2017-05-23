@@ -1,7 +1,7 @@
 version: '3.0'
 services:
     # MongoDB service holding the URL data.
-    mongo:
+    mongodb:
         image: mongo:3.4
         ports:
             - 27017:27017
@@ -9,7 +9,7 @@ services:
             - ./mongo-data:/data/db
 
     # Memcached.
-    memcache:
+    memcached:
         image: memcached:1.4.36
         ports:
             - 11211:11211
@@ -23,8 +23,8 @@ services:
             - CONFIG_PORT=8001
             - CONFIG_DEBUG=true
         links:
-            - mongo
-            - memcache
+            - mongodb
+            - memcached
 
     # Seed MongoDB with initial data set downloaded from http://www.phishtank.com/
     # Seeding additionally takes the URL from the phishtank data and breaks it out into
@@ -32,7 +32,7 @@ services:
     mongo-seed:
         build: seed
         links:
-            - mongo
+            - mongodb
 
 volumes:
     mongo-data: {}

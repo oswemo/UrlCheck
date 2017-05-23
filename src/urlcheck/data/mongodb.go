@@ -7,6 +7,7 @@ import (
 	"urlcheck/models"
 	"urlcheck/utils"
 
+	"fmt"
 	"errors"
 	"time"
 
@@ -39,16 +40,24 @@ type UrlSchemaMongoDB struct {
 // NewMongoDB returns a new instance of the MongoDB struct.
 func NewMongoDB() *MongoDB {
 
-	configuration := &MongoDBConfig{}
+	config := &MongoDBConfig{}
 
-	loader := multiconfig.EnvironmentLoader{Prefix: "MONGODB"}
-	err := loader.Load(configuration)
+	envLoader := multiconfig.EnvironmentLoader{Prefix: "MONGODB"}
+	err := envLoader.Load(config)
 	if err != nil {
-		utils.LogError(utils.LogFields{}, err, "Failed to load configuration for MongoDB")
+		utils.LogError(utils.LogFields{}, err, "Failed to load environment configuration for MongoDB")
 		return nil
 	}
 
-	mongodb := &MongoDB{Config: configuration}
+	tagLoader := multiconfig.TagLoader{}
+	err = tagLoader.Load(config)
+	if err != nil {
+		utils.LogError(utils.LogFields{}, err, "Failed to load tag configuration for MongoDB")
+		return nil
+	}
+
+	fmt.Printf(":: %v\n", config)
+	mongodb := &MongoDB{Config: config}
 	mongodb.Connect()
 	return mongodb
 }

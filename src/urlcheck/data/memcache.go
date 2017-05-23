@@ -26,10 +26,17 @@ type MemcachedConfig struct {
 func NewMemcached() *Memcached {
 	config := &MemcachedConfig{}
 
-	loader := multiconfig.EnvironmentLoader{Prefix: "MEMCACHED"}
-	err := loader.Load(config)
+	envLoader := multiconfig.EnvironmentLoader{Prefix: "MONGODB"}
+	err := envLoader.Load(config)
 	if err != nil {
-		utils.LogError(utils.LogFields{}, err, "Failed to load configuration for Memcached")
+		utils.LogError(utils.LogFields{}, err, "Failed to load environment configuration for Memcached")
+		return nil
+	}
+
+	tagLoader := multiconfig.TagLoader{}
+	err = tagLoader.Load(config)
+	if err != nil {
+		utils.LogError(utils.LogFields{}, err, "Failed to load tag configuration for Memcached")
 		return nil
 	}
 
