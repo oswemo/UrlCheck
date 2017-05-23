@@ -12,6 +12,11 @@ import (
 // Empty data type for responses that don't contain data.
 type EmptyData struct{}
 
+// String data type for simple responses of a single string.
+type StringData struct {
+	Message string `json:"message"`
+}
+
 // HttpStatus is a simple wrapper containing the HTTP status code and an optional
 // message.
 type HttpStatus struct {
@@ -33,6 +38,26 @@ type APIResponse struct {
 	Data interface{} `json:"data"`
 }
 
+// BadRequest generates an APIResponse with embedded error messaging and a Bad Requet status
+func (a *APIResponse) BadRequest(err error) {
+	a.Status = HttpStatus{Code: http.StatusBadRequest, Message: http.StatusText(http.StatusBadRequest)}
+	a.Data = APIError{Error: err.Error()}
+}
+
+// InternalError generates an APIResponse with embedded error messaging and a Internal Error status
+func (a *APIResponse) InternalError(err error) {
+	a.Status = HttpStatus{Code: http.StatusInternalServerError, Message: http.StatusText(http.StatusInternalServerError)}
+	a.Data = APIError{Error: err.Error()}
+}
+
+// Success generates an APIResponse with embedded error messaging and a Success (OK) status
+func (a *APIResponse) Success(data interface{}) {
+	a.Status = HttpStatus{Code: http.StatusOK, Message: http.StatusText(http.StatusOK)}
+	a.Data = data
+}
+
+// http_respond marhals an APIResponse object and writes the output to the
+// http requestor.  If marshaling fails, a simple 500 error is returned.
 func http_respond(response APIResponse, writer http.ResponseWriter) {
 	// Rather than sending a "null" object back in JSON which is sort of ugly,
 	// we'll send back an empty object any time the Data object is null.

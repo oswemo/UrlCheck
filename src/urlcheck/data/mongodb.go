@@ -27,8 +27,8 @@ type MongoDB struct {
 	Session *mgo.Session
 }
 
-// UrlSchema struct defines the layout of the MongoDB collection data.
-type UrlSchema struct {
+// UrlSchemaMongo struct defines the layout of the MongoDB collection data.
+type UrlSchemaMongo struct {
 	ID        bson.ObjectId `bson:"_id,omitempty"`
 	HostPort  string        `json:"hostport"`
 	PathQuery string        `json:"pathquery"`
@@ -103,7 +103,7 @@ func (m MongoDB) AddUrl(hostname string, path string) error {
 		return errors.New("No active connection to the database")
 	}
 
-	doc := UrlSchema{HostPort: hostname, PathQuery: path}
+	doc := UrlSchemaMongo{HostPort: hostname, PathQuery: path}
 	c := m.Session.DB(m.DBName).C(m.Collection)
 	err := c.Insert(&doc)
 	return err

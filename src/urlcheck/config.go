@@ -6,10 +6,16 @@ import (
 	"urlcheck/utils"
 )
 
+// Configuration instance.
+var config *Config
+
 // Configuration options
 type Config struct {
 	Port  int  `json:"port"  default:"8010"`
 	Debug bool `json:"debug" default:"false"`
+
+	// String name of the database type.  Currently MongoDB or SQL
+	Database string `json:"database" default:"SQL"`
 }
 
 // Load the configuration from tag defaults and environment variables.
