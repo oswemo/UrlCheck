@@ -17,7 +17,8 @@ func LoadConfig() (*Config, error) {
 	configuration := &Config{}
 
 	loader := multiconfig.New()
-	err := loader.Load(configuration); if err != nil {
+	err := loader.Load(configuration)
+	if err != nil {
 		utils.LogError(utils.LogFields{}, err, "Failed to load configuration")
 		return nil, err
 	}

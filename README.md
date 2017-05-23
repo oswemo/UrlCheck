@@ -30,3 +30,35 @@ Execute `make run` to run the project.
 1.  Encoding errors in the request cause Gorilla MUX errors that do not conform to the standard responses from other parts of the API.
 2.  For consistency, each start of the service (`make run`) will wipe data and start fresh.
 3.  Database connection and error handling code is rudimentary.  Not production ready.
+
+### Testing   
+
+Requests can be performed using any HTTP client, though most testing to date has been performed via `curl`   
+```shell
+curl -s -XGET http://localhost:8001/urlinfo/1/wirtualnyanalityk.pl:80/%2Fadministrator%2Fcomponents%2Fcom_content%2Felements%2Findex.htm
+```
+
+```shell
+curl -s -XPUT http://localhost:8001/urlinfo/1/wirtualnyanalityk.pl:80/%2Fadministrator%2Fcomponents%2Fcom_content%2Felements%2Findex.htm
+```
+
+Note that the request path and query string are expected to be encoded, where the hostname and port are not.   
+
+Responses are all in JSON (barring those that do not make it past the router, which is a known issue.)   
+All responses will contain a `status` object and a `data` object.  The `status` object is meant to reflect the HTTP status code and message.  The contents of the `data` object are dependant on the API endpoint being queried.
+
+   ```javascript
+   { "status": { "code": 200, "message": "OK" }, "data": { "safe": true } }
+   ```
+
+Any errors that occur, will return an error object for data.   
+
+   ```javascript
+   { "status": {"code": 400, "message": "Bad Request" }, "data": { "error": "Hostname does not appear to be a valid format" } }
+   ```
+
+If the response has no data beyond the HTTP status code, then it will be an empty object.
+
+   ```javascript
+   { "status": {"code": 500, "message": "Internal Server Error" }, "data": { } }
+   ```

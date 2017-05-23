@@ -20,8 +20,8 @@ services:
         ports:
             - 8001:8001
         environment:
-            - PORT=8001
-            - DEBUG=true
+            - CONFIG_PORT=8001
+            - CONFIG_DEBUG=true
         links:
             - mongo
             - memcache

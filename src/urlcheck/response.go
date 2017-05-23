@@ -9,6 +9,9 @@ import (
 	"net/http"
 )
 
+// Empty data type for responses that don't contain data.
+type EmptyData struct{}
+
 // HttpStatus is a simple wrapper containing the HTTP status code and an optional
 // message.
 type HttpStatus struct {
@@ -32,9 +35,9 @@ type APIResponse struct {
 
 func http_respond(response APIResponse, writer http.ResponseWriter) {
 	// Rather than sending a "null" object back in JSON which is sort of ugly,
-	// we'll send back an empty string any time the Data object is null.
+	// we'll send back an empty object any time the Data object is null.
 	if response.Data == nil {
-		response.Data = ""
+		response.Data = EmptyData{}
 	}
 
 	// Marshal the response to be sent back to the user.  If marshaling fails for
