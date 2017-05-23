@@ -46,7 +46,7 @@ func SelectCache(cacheType string) CacheInterface {
 	default:
 		utils.LogError(utils.LogFields{"cachetype": cacheType}, errors.New("Invalid cache type"), "")
 	case "memcached":
-		return NewMemcache()
+		return NewMemcached()
 	}
 
 	return nil

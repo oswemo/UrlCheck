@@ -18,24 +18,24 @@ type Memcached struct {
 }
 
 type MemcachedConfig struct {
-	Servers    string `json:"servers"    default:"memcache:11211"` // MEMCACHEDCONFIG_SERVERS
-	Expiration int    `json:"expiration" default:"300"`            // MEMCACHEDCONFIG_EXPIRATION
+	Servers    string `json:"servers"    default:"memcached:11211"` // MEMCACHED_SERVERS
+	Expiration int    `json:"expiration" default:"300"`             // MEMCACHED_EXPIRATION
 }
 
 // New returns a new memcached object
-func NewMemcache() *Memcached {
+func NewMemcached() *Memcached {
 	config := &MemcachedConfig{}
 
 	loader := multiconfig.EnvironmentLoader{Prefix: "MEMCACHED"}
 	err := loader.Load(config)
 	if err != nil {
-		utils.LogError(utils.LogFields{}, err, "Failed to load configuration")
+		utils.LogError(utils.LogFields{}, err, "Failed to load configuration for Memcached")
 		return nil
 	}
 
 	memcached := &Memcached{Config: config}
 
-	utils.LogInfo(utils.LogFields{"servers": config.Servers, "expiration": config.Expiration}, "Creating connection to memcached")
+	utils.LogInfo(utils.LogFields{"servers": config.Servers, "expiration": config.Expiration}, "Creating connection to Memcached")
 	memcached.Client = memcache.New(config.Servers)
 	return memcached
 }

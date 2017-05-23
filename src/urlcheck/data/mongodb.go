@@ -23,14 +23,14 @@ type MongoDB struct {
 
 // MongoDBConfig defines configuration options for multiconfig
 type MongoDBConfig struct {
-	URL        string `json:"url"        default:"mongo"`   // MONGODBCONFIG_URL
-	Database   string `json:"database"   default:"urlinfo"` // MONGODBCONFIG_DATABASE
-	Collection string `json:"collection" default:"urls"`    // MONGODBCONFIG_COLLECTION
-	Timeout    int    `json:"timeout"    default:"2"`       // MONGODBCONFIG_TIMEOUT
+	URL        string `json:"url"        default:"mongodb"` // MONGODB_URL
+	Database   string `json:"database"   default:"urlinfo"` // MONGODB_DATABASE
+	Collection string `json:"collection" default:"urls"`    // MONGODB_COLLECTION
+	Timeout    int    `json:"timeout"    default:"2"`       // MONGODB_TIMEOUT
 }
 
-// UrlSchemaMongo struct defines the layout of the MongoDB collection data.
-type UrlSchemaMongo struct {
+// UrlSchemaMongoDB struct defines the layout of the MongoDB collection data.
+type UrlSchemaMongoDB struct {
 	ID        bson.ObjectId `bson:"_id,omitempty"`
 	HostPort  string        `json:"hostport"`
 	PathQuery string        `json:"pathquery"`
@@ -44,13 +44,13 @@ func NewMongoDB() *MongoDB {
 	loader := multiconfig.EnvironmentLoader{Prefix: "MONGODB"}
 	err := loader.Load(configuration)
 	if err != nil {
-		utils.LogError(utils.LogFields{}, err, "Failed to load configuration")
+		utils.LogError(utils.LogFields{}, err, "Failed to load configuration for MongoDB")
 		return nil
 	}
 
-	mongo := &MongoDB{Config: configuration}
-	mongo.Connect()
-	return mongo
+	mongodb := &MongoDB{Config: configuration}
+	mongodb.Connect()
+	return mongodb
 }
 
 // Connect connects to the MongoDB server
@@ -59,12 +59,12 @@ func (m *MongoDB) Connect() error {
 
 	// Set up the MongoDB session.  Timeout set for connection and subsequent queries
 	// to limit requests having to wait for a response.
-	utils.LogInfo(utils.LogFields{"url": m.Config.URL, "timeout": m.Config.Timeout}, "Creating connection to mongodb")
+	utils.LogInfo(utils.LogFields{"url": m.Config.URL, "timeout": m.Config.Timeout}, "Creating connection to MongoDB")
 	timeout := time.Duration(m.Config.Timeout) * time.Second
 	m.Session, err = mgo.DialWithTimeout(m.Config.URL, timeout)
 
 	if err != nil {
-		utils.LogError(utils.LogFields{"url": m.Config.URL}, err, "Error connecting to Mongo")
+		utils.LogError(utils.LogFields{"url": m.Config.URL}, err, "Error connecting to MongoDB")
 	}
 
 	return err
@@ -110,7 +110,7 @@ func (m MongoDB) AddUrl(hostname string, path string) error {
 		return errors.New("No active connection to the database")
 	}
 
-	doc := UrlSchemaMongo{HostPort: hostname, PathQuery: path}
+	doc := UrlSchemaMongoDB{HostPort: hostname, PathQuery: path}
 	c := m.Session.DB(m.Config.Database).C(m.Config.Collection)
 	err := c.Insert(&doc)
 	return err
