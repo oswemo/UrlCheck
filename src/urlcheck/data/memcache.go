@@ -6,6 +6,8 @@ import (
 	"urlcheck/utils"
 
 	"fmt"
+
+	"github.com/koding/multiconfig"
 	"github.com/bradfitz/gomemcache/memcache"
 )
 
@@ -16,13 +18,22 @@ type Memcached struct {
 }
 
 type MemcachedConfig struct {
-	Servers    string `json:"servers"    default:"memcache:11211"`
-	Expiration int    `json:"expiration" default:"300"`
+	Servers    string `json:"servers"    default:"memcache:11211"`    // MEMCACHEDCONFIG_SERVERS
+	Expiration int    `json:"expiration" default:"300"`               // MEMCACHEDCONFIG_EXPIRATION
 }
 
 // New returns a new memcached object
-func NewMemcache(config *MemcachedConfig) Memcached {
-	memcached := Memcached{ Config: config }
+func NewMemcache() (*Memcached) {
+	config := &MemcachedConfig{}
+
+	loader := multiconfig.New()
+	err := loader.Load(config)
+	if err != nil {
+		utils.LogError(utils.LogFields{}, err, "Failed to load configuration")
+		return nil
+	}
+
+	memcached := &Memcached{ Config: config }
 
 	utils.LogInfo(utils.LogFields{"servers": config.Servers, "expiration": config.Expiration}, "Creating connection to memcached")
 	memcached.Client = memcache.New(config.Servers)

@@ -15,7 +15,6 @@ type Config struct {
 	Port     int                  `json:"port"  default:"8010"`
 	Debug    bool                 `json:"debug" default:"false"`
 
-	Mongo    data.MongoDBConfig   `json:"mongo"`
 	Memcache data.MemcachedConfig `json:"memcache"`
 }
 

@@ -12,6 +12,7 @@ import (
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"github.com/koding/multiconfig"
 )
 
 // MongoDB Struct, defines options for MongoDB database connections.
@@ -22,10 +23,10 @@ type MongoDB struct {
 
 // MongoDBConfig defines configuration options for multiconfig
 type MongoDBConfig struct {
-	URL        string `json:"url"        default:"mongo"`
-	Database   string `json:"database"   default:"urlinfo"`
-	Collection string `json:"collection" default:"urls"`
-	Timeout    int    `json:"timeout"    default:"2"`
+	URL        string `json:"url"        default:"mongo"`		// MONGODBCONFIG_URL
+	Database   string `json:"database"   default:"urlinfo"`     // MONGODBCONFIG_DATABASE
+	Collection string `json:"collection" default:"urls"`        // MONGODBCONFIG_COLLECTION
+	Timeout    int    `json:"timeout"    default:"2"`           // MONGODBCONFIG_TIMEOUT
 }
 
 // UrlSchemaMongo struct defines the layout of the MongoDB collection data.
@@ -36,9 +37,19 @@ type UrlSchemaMongo struct {
 }
 
 // NewMongoDB returns a new instance of the MongoDB struct.
-func NewMongoDB(config *MongoDBConfig) MongoDB {
-	mongo := MongoDB{ Config: config }
-	(&mongo).Connect()
+func NewMongoDB() (*MongoDB) {
+
+	configuration := &MongoDBConfig{}
+
+	loader := multiconfig.New()
+	err := loader.Load(configuration)
+	if err != nil {
+		utils.LogError(utils.LogFields{}, err, "Failed to load configuration")
+		return nil
+	}
+
+	mongo := &MongoDB{ Config: configuration }
+	mongo.Connect()
 	return mongo
 }
 
