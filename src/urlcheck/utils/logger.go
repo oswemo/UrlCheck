@@ -53,13 +53,13 @@ func FunctionName() string {
 // getFields is a private function that returns the fields that should be logged.
 // When called, it takes the given fields and adds a field for the package name and
 // a field for the function.
-func getFields(fields map[string]interface{}) log.Fields {
+func getFields(fields map[string]interface{}, offset int) log.Fields {
 	logFields := log.Fields{}
 	for key := range fields {
 		logFields[key] = fields[key]
 	}
 
-	pkg, fun := packageAndFunc(3)
+	pkg, fun := packageAndFunc(offset)
 	logFields["package"] = pkg
 	logFields["function"] = fun
 	return logFields
@@ -70,21 +70,26 @@ func SetDebug() {
 	log.SetLevel(log.DebugLevel)
 }
 
+// SetFatal sets the log level to debug to show additional logging.
+func SetFatal() {
+	log.SetLevel(log.FatalLevel)
+}
+
 // LogInfo logs informational data
 func LogInfo(fields map[string]interface{}, format string, vargs ...interface{}) {
 	log.SetFormatter(&log.JSONFormatter{})
-	log.WithFields(getFields(fields)).Infof(format, vargs...)
+	log.WithFields(getFields(fields, 4)).Infof(format, vargs...)
 }
 
 // LogError logs error data
 func LogError(fields map[string]interface{}, err error, format string, vargs ...interface{}) {
 	fields["error"] = err.Error()
 	log.SetFormatter(&log.JSONFormatter{})
-	log.WithFields(getFields(fields)).Errorf(format, vargs...)
+	log.WithFields(getFields(fields, 4)).Errorf(format, vargs...)
 }
 
 // LogDebug logs debug data
 func LogDebug(fields map[string]interface{}, format string, vargs ...interface{}) {
 	log.SetFormatter(&log.JSONFormatter{})
-	log.WithFields(getFields(fields)).Debugf(format, vargs...)
+	log.WithFields(getFields(fields, 4)).Debugf(format, vargs...)
 }

@@ -28,26 +28,29 @@ type CacheInterface interface {
 	Set(string, string) error
 }
 
-// Return the selected database backend
-func SelectDB(dbType string) DBInterface {
+// Return the selected database backend or an error if the type is invalid.
+func SelectDB(dbType string) (DBInterface, error) {
 	switch dbType {
-	default:
-		utils.LogError(utils.LogFields{"dbtype": dbType}, errors.New("Invalid DB type"), "")
 	case "mongodb":
-		return NewMongoDB()
+		return NewMongoDB(), nil
 	}
 
-	return nil
+	utils.LogDebug(utils.LogFields{"dbtype": dbType}, "Invalid DB type")
+	return nil, errors.New("Invalid database type")
 }
 
-// Return the selected cache backend
-func SelectCache(cacheType string) CacheInterface {
+// Return the selected cache backend or an error if the type is invalid.
+func SelectCache(cacheType string) (CacheInterface, error) {
+
 	switch cacheType {
-	default:
-		utils.LogError(utils.LogFields{"cachetype": cacheType}, errors.New("Invalid cache type"), "")
+	case "":
+		utils.LogDebug(utils.LogFields{}, "Continuing with cache disabled")
+		return nil, nil
+
 	case "memcached":
-		return NewMemcached()
+		return NewMemcached(), nil
 	}
 
-	return nil
+	utils.LogDebug(utils.LogFields{"cachetype": cacheType}, "Invalid cache type")
+	return nil, errors.New("Invalid cache type")
 }

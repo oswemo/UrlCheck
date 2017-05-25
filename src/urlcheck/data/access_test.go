@@ -1,6 +1,7 @@
 package data
 
 import "testing"
+import "urlcheck/utils"
 
 func TestSelectDB(t *testing.T) {
 	testCases := []struct {
@@ -11,12 +12,14 @@ func TestSelectDB(t *testing.T) {
 		{DBType: "testing", Valid: false},
 	}
 
+	utils.SetFatal()
+
 	for _, c := range testCases {
-		result := SelectDB(c.DBType)
-		if result == nil && c.Valid {
+		_, err := SelectDB(c.DBType)
+		if err != nil && c.Valid {
 			t.Errorf("Expected DB type %s to be valid", c.DBType)
 		}
-		if result != nil && !c.Valid {
+		if err == nil && !c.Valid {
 			t.Errorf("Expected DB type %s to be invalid", c.DBType)
 		}
 	}
@@ -31,12 +34,13 @@ func TestSelectCache(t *testing.T) {
 		{CacheType: "testing", Valid: false},
 	}
 
+	utils.SetFatal()
 	for _, c := range testCases {
-		result := SelectCache(c.CacheType)
-		if result == nil && c.Valid {
+		_, err := SelectCache(c.CacheType)
+		if err != nil && c.Valid {
 			t.Errorf("Expected cache type %s to be valid", c.CacheType)
 		}
-		if result != nil && !c.Valid {
+		if err == nil && !c.Valid {
 			t.Errorf("Expected cache type %s to be invalid", c.CacheType)
 		}
 	}

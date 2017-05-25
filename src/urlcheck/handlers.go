@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 
-	"urlcheck/data"
 	"urlcheck/services"
 	"urlcheck/utils"
 )
@@ -35,11 +34,14 @@ func checkUrl(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	urlService := services.UrlService{
-		Hostname: hostname,
-		Path:     decodedPath,
-		Database: data.SelectDB(config.DBType),
-		Cache:    data.SelectCache(config.CacheType),
+	// Generate URL service for querying the URL
+	urlService, err := services.NewUrlService(hostname, decodedPath, config.DBType, config.CacheType)
+
+	if err != nil {
+		utils.LogError(utils.LogFields{"hostname": hostname, "path": decodedPath}, err, "Error getting URL")
+		response.InternalError(errors.New("An error occurred"))
+		http_respond(response, writer)
+		return
 	}
 
 	urlStatus, err := urlService.FindUrl()
@@ -75,11 +77,13 @@ func addUrl(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	urlService := services.UrlService{
-		Hostname: hostname,
-		Path:     decodedPath,
-		Database: data.SelectDB(config.DBType),
-		Cache:    data.SelectCache(config.CacheType),
+	// Generate URL service for querying the URL
+	urlService, err := services.NewUrlService(hostname, decodedPath, config.DBType, config.CacheType)
+	if err != nil {
+		utils.LogError(utils.LogFields{"hostname": hostname, "path": decodedPath}, err, "Error getting URL")
+		response.InternalError(errors.New("An error occurred"))
+		http_respond(response, writer)
+		return
 	}
 
 	err = urlService.AddUrl()

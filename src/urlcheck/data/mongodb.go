@@ -7,7 +7,6 @@ import (
 	"urlcheck/models"
 	"urlcheck/utils"
 
-	"fmt"
 	"errors"
 	"time"
 
@@ -42,21 +41,20 @@ func NewMongoDB() *MongoDB {
 
 	config := &MongoDBConfig{}
 
-	envLoader := multiconfig.EnvironmentLoader{Prefix: "MONGODB"}
-	err := envLoader.Load(config)
-	if err != nil {
-		utils.LogError(utils.LogFields{}, err, "Failed to load environment configuration for MongoDB")
-		return nil
-	}
-
 	tagLoader := multiconfig.TagLoader{}
-	err = tagLoader.Load(config)
+	err := tagLoader.Load(config)
 	if err != nil {
 		utils.LogError(utils.LogFields{}, err, "Failed to load tag configuration for MongoDB")
 		return nil
 	}
 
-	fmt.Printf(":: %v\n", config)
+	envLoader := multiconfig.EnvironmentLoader{Prefix: "MONGODB"}
+	err = envLoader.Load(config)
+	if err != nil {
+		utils.LogError(utils.LogFields{}, err, "Failed to load environment configuration for MongoDB")
+		return nil
+	}
+
 	mongodb := &MongoDB{Config: config}
 	mongodb.Connect()
 	return mongodb

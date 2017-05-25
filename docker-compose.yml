@@ -22,6 +22,7 @@ services:
         environment:
             - CONFIG_PORT=8001
             - CONFIG_DEBUG=true
+            - CONFIG_DBTYPE=mongodb
         links:
             - mongodb
             - memcached

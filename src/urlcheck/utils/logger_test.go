@@ -49,7 +49,8 @@ func TestGetFields(t *testing.T) {
 		"function": "TestGetFields",
 	}
 
-	fields := getFields(map[string]interface{}{"key": "value"})
+	// use an offset of 3 to specify this function/package.
+	fields := getFields(map[string]interface{}{"key": "value"}, 3)
 
 	match := (len(fields) == len(expected))
 

@@ -77,8 +77,6 @@ func (m MockCache) Set(hostname string, path string) error {
 // TestFindUrl tests the FindUrl() method
 func TestFindUrl(t *testing.T) {
 
-	utils.SetDebug()
-
 	testCases := []struct {
 		Hostname string
 		Path     string
@@ -108,6 +106,8 @@ func TestFindUrl(t *testing.T) {
 			IsSafe:   false,
 		},
 	}
+
+	utils.SetFatal()
 
 	// Run through test cases.
 	for _, c := range testCases {
@@ -169,6 +169,8 @@ func TestAddUrl(t *testing.T) {
 			Success:  false,
 		},
 	}
+
+	utils.SetFatal()
 
 	// Run through test cases.
 	for _, c := range testCases {
