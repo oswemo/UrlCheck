@@ -9,6 +9,7 @@ func TestSelectDB(t *testing.T) {
 		Valid  bool
 	}{
 		{DBType: "mongodb", Valid: true},
+		{DBType: "sqldb", Valid: true},
 		{DBType: "testing", Valid: false},
 	}
 
@@ -30,6 +31,7 @@ func TestSelectCache(t *testing.T) {
 		CacheType string
 		Valid     bool
 	}{
+	    {CacheType: "", Valid: true},
 		{CacheType: "memcached", Valid: true},
 		{CacheType: "testing", Valid: false},
 	}

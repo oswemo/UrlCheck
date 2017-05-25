@@ -30,13 +30,26 @@ type CacheInterface interface {
 
 // Return the selected database backend or an error if the type is invalid.
 func SelectDB(dbType string) (DBInterface, error) {
+	var db DBInterface
+	var err error
+
 	switch dbType {
 	case "mongodb":
-		return NewMongoDB(), nil
+		db, err = NewMongoDB()
+	case "sqldb":
+		db, err = NewSQLDB()
 	}
 
-	utils.LogDebug(utils.LogFields{"dbtype": dbType}, "Invalid DB type")
-	return nil, errors.New("Invalid database type")
+	if err != nil {
+		return nil, err
+	}
+
+	if db == nil {
+		utils.LogDebug(utils.LogFields{"dbtype": dbType}, "Invalid DB type")
+		return nil, errors.New("Invalid database type")
+	}
+
+	return db, nil
 }
 
 // Return the selected cache backend or an error if the type is invalid.

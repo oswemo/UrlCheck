@@ -24,19 +24,19 @@ type Config struct {
 func validateConfig(config *Config) error {
 	// Require a database definition.
 	if config.DBType == "" {
-		return errors.New("Invalid configuration.  Database type required.")
+		return errors.New("Invalid configuration. Database type required.")
 	}
 
 	// Validate the database type.
 	_, err := data.SelectDB(config.DBType)
 	if err != nil {
-		return errors.New("Invalid configuration.  Invalid database type defined.")
+		return err
 	}
 
 	// Validate the cache type.
 	_, err = data.SelectCache(config.CacheType)
 	if err != nil {
-		return errors.New("Invalid configuration.  Invalid cache type defined.")
+		return err
 	}
 
 	return nil

@@ -37,7 +37,7 @@ type UrlSchemaMongoDB struct {
 }
 
 // NewMongoDB returns a new instance of the MongoDB struct.
-func NewMongoDB() *MongoDB {
+func NewMongoDB() (*MongoDB, error) {
 
 	config := &MongoDBConfig{}
 
@@ -45,19 +45,19 @@ func NewMongoDB() *MongoDB {
 	err := tagLoader.Load(config)
 	if err != nil {
 		utils.LogError(utils.LogFields{}, err, "Failed to load tag configuration for MongoDB")
-		return nil
+		return nil, err
 	}
 
 	envLoader := multiconfig.EnvironmentLoader{Prefix: "MONGODB"}
 	err = envLoader.Load(config)
 	if err != nil {
 		utils.LogError(utils.LogFields{}, err, "Failed to load environment configuration for MongoDB")
-		return nil
+		return nil, err
 	}
 
 	mongodb := &MongoDB{Config: config}
 	mongodb.Connect()
-	return mongodb
+	return mongodb, nil
 }
 
 // Connect connects to the MongoDB server
