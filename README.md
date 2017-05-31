@@ -22,7 +22,7 @@ I opted to not bother starting with in-memory storage.  While possible, it would
 SQL support has also been added.  While it technically supports postgres, mysql, mssql and sqlite, only mysql has been tested so far.   
 
 ### Building:
-Execute `make build` to build the project.
+Execute `make deps` and `make build` to build the project.
 
 ### Deploying:
 Execute `make run` to run the project.
