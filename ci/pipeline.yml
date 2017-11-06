@@ -10,6 +10,15 @@ jobs:
   - task: task-unit-tests
     file: UrlCheck/ci/tasks/unit-test.yml
 
+-name: build
+  plan:
+
+  - get: UrlCheck
+    trigger: true 
+    version: every 
+
+  - task: task-build
+    file: UrlCheck/ci/tasks/build.yml
 resources:
 - name: UrlCheck
   type: git
