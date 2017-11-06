@@ -5,6 +5,7 @@ set -e -x
 # Setup the gopath based on current directory.
 export GOPATH=$PWD
 
+ls -la
 # Now we must move our code from the current directory ./hello-go to $GOPATH/src/github.com/JeffDeCola/hello-go
 mkdir -p src/github.com/oswemo
 cp -R ./urlCheck src/github.com/oswemo/.
