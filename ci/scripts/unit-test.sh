@@ -16,6 +16,8 @@ echo "pwd is: " $PWD
 cd src/github.com/oswemo/UrlCheck
 ls -lat
 
+make deps build
+
 # RUN unit_tests and it shows the percentage coverage
 # print to stdout and file using tee
 go test -cover ./... | tee test_coverage.txt
