@@ -1,0 +1,22 @@
+jobs:
+
+- name: unit-test
+  plan:
+  
+  - get: UrlCheck
+    trigger: true
+    version: every
+  
+  - task: task-unit-tests
+    file: UrlCheck/ci/tasks/unit-test.yml
+
+resources:
+- name: UrlCheck
+  type: git
+  source:
+    uri: https://github.com/oswemo/UrlCheck.git
+    branch: master
+    
+  check_every: 5m
+
+
