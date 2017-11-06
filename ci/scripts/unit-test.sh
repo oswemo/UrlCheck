@@ -1,3 +1,5 @@
+#!/bin/sh
+
 set -e -x
 
 # Setup the gopath based on current directory.
