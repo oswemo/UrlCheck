@@ -14,6 +14,9 @@ default: deps build
 test:
 	@go test -v ${PACKAGES}
 
+cover:
+	@go test -cover ./...
+
 fmt:
 	@go fmt ${PACKAGES}
 

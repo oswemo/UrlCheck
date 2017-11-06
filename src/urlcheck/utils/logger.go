@@ -5,9 +5,10 @@ package utils
 // and package in which the log call was performed.
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"runtime"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Stolen from logrus.  Allows use of the type in our classes without having
